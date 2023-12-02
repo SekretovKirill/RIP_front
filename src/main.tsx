@@ -6,12 +6,8 @@ import EmployeeDetailPage from './EmployeeDetail';
 
 const router = createBrowserRouter([
   {
-    path: '/',
-    element: <h1>Это наша стартовая страница</h1>,
-  },
-  {
-    path: '/RIP/',
-    element: <h1>Это наша страница с чем-то новеньким</h1>,
+    path: '/RIP_front',
+    element: <EmployeesPage />,
   },
   {
     path: '/RIP_front/employees',
