@@ -42,7 +42,7 @@ const EmployeesPage: FC = () => {
 
   const handleSearchClick = () => {
     // Redirect to the same frontend page with the search query parameter
-    navigateTo(`/employees/?filter=${nameValue}`);
+    navigateTo(`?filter=${nameValue}`);
     // Fetch data after navigating to the new URL
     fetchEmployees(nameValue);
   };
@@ -82,7 +82,7 @@ const EmployeesPage: FC = () => {
                   <div className="card-body">
                     <h3 className="card-title">{employee.name}</h3>
                     <p className="card-text">Должность: {employee.role}</p>
-                    <button onClick={() => navigateTo(`/employees/${employee.id}/`)} className="btn btn-primary">
+                    <button onClick={() => navigateTo(`/RIP_front/employees/${employee.id}/`)} className="btn btn-primary">
                       Подробнее
                     </button>
                   </div>

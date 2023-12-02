@@ -14,11 +14,11 @@ const router = createBrowserRouter([
     element: <h1>Это наша страница с чем-то новеньким</h1>,
   },
   {
-    path: '/employees',
+    path: '/RIP_front/employees',
     element: <EmployeesPage />,
   },
   {
-    path: '/employees/:id/',
+    path: '/RIP_front/employees/:id/',
     element: <EmployeeDetailPage />,
   },
 ]);

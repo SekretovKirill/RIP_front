@@ -14,7 +14,7 @@ const EmployeeDetailPage: React.FC = () => {
   });
 
   const breadcrumbsItems = [
-    { label: 'Все сотрудники', link: '/employees' },
+    { label: 'Все сотрудники', link: '/RIP_front/employees' },
     { label: 'Подробнее', link: '' },
   ];
 
