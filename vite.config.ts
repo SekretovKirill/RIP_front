@@ -12,6 +12,6 @@ export default defineConfig({
       },
     },
    },
-  base: "YOUR_REPOSITORY_NAME",
+  base: "RIP_front",
   plugins: [react()],
 })
