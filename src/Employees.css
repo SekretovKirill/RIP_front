@@ -188,3 +188,24 @@ img {
 #search-button:hover {
     background-color: #555;
 }
+
+.sort-button-container {
+    text-align: center;
+    margin-top: 10px; /* Добавлен верхний отступ для улучшения визуального восприятия */
+  }
+  
+  #sort-button {
+    /* Добавлены стили для кнопки */
+    padding: 8px 16px;
+    font-size: 16px;
+    background-color: #333; /* Цвет фона */
+    color: #fff; /* Цвет текста */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  #sort-button:hover {
+    background-color: #555; /* Цвет фона при наведении */
+  }

@@ -4,8 +4,6 @@ import Breadcrumbs from './Breadcrumbs';
 import './Employees.css';
 import logoImage from './logo.jpg';
 
-
-
 interface Employee {
   id: number;
   name: string;
@@ -23,9 +21,9 @@ const EmployeesPage: FC = () => {
 
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [nameValue, setNameValue] = useState(nameParam);
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const fetchEmployees = (searchName: string) => {
-    // Fetch employee data using the relative path with query parameter
     fetch(`http://localhost:8000/employees/?filter=${searchName}`)
       .then(response => response.json())
       .then(data => {
@@ -41,22 +39,31 @@ const EmployeesPage: FC = () => {
   ];
 
   const handleSearchClick = () => {
-    // Redirect to the same frontend page with the search query parameter
     navigateTo(`?filter=${nameValue}`);
-    // Fetch data after navigating to the new URL
     fetchEmployees(nameValue);
   };
 
+  const handleSortClick = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
   useEffect(() => {
-    // Fetch data when the component mounts for the first time or when search query changes
     fetchEmployees(nameValue);
-  }, [nameValue]); // Update the effect to run whenever nameValue or roleValue changes
+  }, [nameValue]);
+
+  const sortedEmployees = employees.slice().sort((a, b) => {
+    const nameA = a.name.toLowerCase();
+    const nameB = b.name.toLowerCase();
+
+    return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+  });
 
   return (
     <div className="album">
       <div className="container">
         <div className="row">
           <Breadcrumbs items={breadcrumbsItems} />
+
           <div className="search-bar">
             <input
               type="text"
@@ -70,8 +77,15 @@ const EmployeesPage: FC = () => {
             </button>
           </div>
 
+          {/* Добавлен блок для кнопки сортировки */}
+          <div className="sort-button-container text-center">
+            <button type="button" id="sort-button" onClick={handleSortClick}>
+              Сортировка: {sortOrder === 'asc' ? 'А-Я' : 'Я-А'}
+            </button>
+          </div>
+
           <ul className="employees-list">
-            {employees.map((employee) => (
+            {sortedEmployees.map((employee) => (
               <li key={employee.id}>
                 <div className="card">
                   <img
