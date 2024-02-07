@@ -10,3 +10,16 @@ export default defineConfig({
   base: "RIP_front",
   plugins: [react()],
 })
+
+// export default defineConfig({
+//   plugins: [react()],
+//   server: {
+//     proxy: {
+//       "/RIP_front": {
+//         target: "http://localhost:8000",
+//         changeOrigin: true,
+//         rewrite: (path) => path.replace(/^\/RIP_front/, "/"),
+//       },
+//     },
+//   },
+// });
