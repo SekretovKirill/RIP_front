@@ -54,7 +54,7 @@ const RequestDetailsPage: React.FC = () => {
 
   const fetchRequestDetails = async () => {
     try {
-      const response = await axios.get<RequestDetails>(`http://localhost:8000/requests/${id}/`, { withCredentials: true });
+      const response = await axios.get<RequestDetails>(`/api/requests/${id}/`, { withCredentials: true });
       setRequestDetails(response.data);
     } catch (error) {
       console.error('Error fetching request details:', error);
@@ -80,7 +80,7 @@ const RequestDetailsPage: React.FC = () => {
 
   const handleRemoveEmployee = async (employeeId: number) => {
     try {
-      await axios.delete(`http://localhost:8000/remove-employee-from-request`, {
+      await axios.delete(`/api/remove-employee-from-request/`, {
         data: { request_id: id, employee_id: employeeId },
         withCredentials: true,
       });
@@ -92,7 +92,7 @@ const RequestDetailsPage: React.FC = () => {
 
   const handleSendRequest = async () => {
     try {
-      await axios.put(`http://localhost:8000/requests/${id}/put_user/`, null, {
+      await axios.put(`/api/requests/${id}/put_user/`, null, {
         withCredentials: true,
       });
       fetchRequestDetails();

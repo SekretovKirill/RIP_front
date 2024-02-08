@@ -53,7 +53,7 @@ const ModeratorEmployeesChangePage: React.FC = () => {
     const fetchEmployeeData = async () => {
       try {
         if (id) {
-          const response = await axios.get(`http://localhost:8000/employees/photo/${id}/`);
+          const response = await axios.get(`/api/employees/photo/${id}/`);
           setEmployeeData(response.data);
           setEditedData(response.data);
         }
@@ -106,8 +106,8 @@ const ModeratorEmployeesChangePage: React.FC = () => {
       };
 
       const response = isCreate
-        ? await axios.post(`http://localhost:8000/employees/post/`, formData, requestConfig)
-        : await axios.put(`http://localhost:8000/employees/${id ? id + '/' : ''}put_photo/`, formData, requestConfig);
+        ? await axios.post(`/api/employees/post/`, formData, requestConfig)
+        : await axios.put(`/api/employees/${id ? id + '/' : ''}put_photo/`, formData, requestConfig);
 
       const updatedData = response.data;
       setEmployeeData(updatedData);

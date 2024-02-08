@@ -50,7 +50,7 @@ const ModeratorRequestsPage: FC = () => {
 
   const fetchRequests = async () => {
     try {
-      const response = await axios.get<Request[]>(`http://localhost:8000/requests/`, {
+      const response = await axios.get<Request[]>(`/api/requests/`, {
         params: {
           status: filter.status,
           start_date: filter.startDate,
@@ -128,7 +128,7 @@ const ModeratorRequestsPage: FC = () => {
     //   'Cookie': `session_key=${cookies}`
     // };
   
-    axios.put(`http://localhost:8000/requests/${requestId}/put_admin/`, data, {withCredentials: true,})
+    axios.put(`/api/requests/${requestId}/put_admin/`, data, {withCredentials: true,})
       .then(response => {
         console.log(response.data);
         fetchRequests();
@@ -140,7 +140,7 @@ const ModeratorRequestsPage: FC = () => {
   const handleReject = (requestId: number) => {
     const data = { status: 'canceled' };
   
-    axios.put(`http://localhost:8000/requests/${requestId}/put_admin/`, data, {withCredentials: true,})
+    axios.put(`/api/requests/${requestId}/put_admin/`, data, {withCredentials: true,})
       .then(response => {
         console.log(response.data);
         fetchRequests();

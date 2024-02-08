@@ -2,6 +2,7 @@ import React, { FC, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import '../styles/Employees.css';
+import SearchBar from './SearchBar';
 import { RootState } from '../redux/store';
 import { setSearch, setSortOrder } from '../redux/FilterSlice';
 import SortButton from './SortButton';
@@ -10,12 +11,18 @@ import Breadcrumbs from './Breadcrumbs';
 
 import axios from 'axios';
 
+
 interface Employee {
   id: number;
   name: string;
   status: boolean;
   role: string;
   info: string;
+  photo_binary: string|null;
+}
+interface EmployeePageState {
+  employees: Employee[];
+  draft_id: number | null;
 }
 
 const breadcrumbsItems = [
@@ -29,35 +36,24 @@ const ModeratorEmployeesPage: FC = () => {
   const queryParams = new URLSearchParams(location.search);
   const searchParam = queryParams.get('q') || '';
 
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [searchValue, setSearchValue] = useState(searchParam);
   const [sortOrder, setLocalSortOrder] = useState<'asc' | 'desc'>('asc');
   const auth = useSelector((state: RootState) => state.auth);
-
+  const [state, setState] = useState<EmployeePageState>({
+    employees: [],
+    draft_id: null,
+  });
   const filter = useSelector((state: RootState) => state.filter);
 
   const isUserLoggedIn = document.cookie.includes('session_key');
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearchValue = e.target.value;
-    setSearchValue(newSearchValue);
-    dispatch(setSearch(newSearchValue));
-  };
-
-  const handleSearchClick = () => {
-    axios.get(`http://localhost:8000/employees/?filter=${searchValue}`)
-      .then(response => {
-        const data = response.data;
-        setEmployees(data);
-      })
-      .catch(error => {
-        console.error('Error fetching employees:', error);
-      });
+  const handleSearch = (query: string) => {
+    dispatch(setSearch(query));
+    fetchEmployees(query);
   };
 
   const handleDelete = (employeeId: number) => {
-    axios.delete(`http://localhost:8000/employees/${employeeId}/delete/`,  {withCredentials: true} )
-      .then(() => fetchEmployees(searchValue))
+    axios.delete(`/api/employees/${employeeId}/delete/`,  {withCredentials: true} )
+      .then(() => fetchEmployees(filter.search || searchParam))
       .catch(error => {
         console.error('Error deleting employee:', error);
       });
@@ -65,16 +61,12 @@ const ModeratorEmployeesPage: FC = () => {
 
 
   const fetchEmployees = (searchText: string) => {
-    axios.get(`http://localhost:8000/employees/?filter=${searchText}&order=${sortOrder}`, {
+    axios.get(`/api/employees/?filter=${searchText}`, {
       withCredentials: true,
     })
       .then(response => {
-        const { employees, draft_id } = response.data;
-        console.log(draft_id)
-        
-        // If draft_id is needed for some logic, use it here
-  
-        setEmployees(employees);
+        const { employees, draft_id }: { employees: Employee[]; draft_id: number | null } = response.data;
+        setState((prev) => ({ ...prev, employees, draft_id: draft_id !== undefined ? draft_id : null }));
       })
       .catch(error => {
         console.error('Error fetching employees:', error);
@@ -96,21 +88,18 @@ const ModeratorEmployeesPage: FC = () => {
     if (!isUserLoggedIn || auth.role !== 'Admin') {
       navigateTo('/RIP_front/login');
     } else {
-      const storedSearch = localStorage.getItem('search') || '';
       setLocalSortOrder(getValidSortOrder(filter.sortOrder));
-      setSearchValue(storedSearch);
-      dispatch(setSearch(storedSearch));
-      fetchEmployees(storedSearch);
+      fetchEmployees(filter.search || searchParam);
     }
   }, [auth.isAuthenticated, auth.role, navigateTo]);
 
 
-  const sortedEmployees = employees.slice().sort((a, b) => {
+  const sortedEmployees = state.employees ? state.employees.slice().sort((a, b) => {
     const nameA = a.name.toLowerCase();
     const nameB = b.name.toLowerCase();
-
+  
     return sortOrder === 'asc' ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
-  });
+  }) : [];
 
   return (
     <div>
@@ -120,16 +109,7 @@ const ModeratorEmployeesPage: FC = () => {
           <div className="row">
             <Breadcrumbs items={breadcrumbsItems} />
             <div className="input-group mb-3">
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Поиск"
-                value={searchValue}
-                onChange={handleSearchChange}
-              />
-              <button className="btn btn-outline-secondary" type="button" onClick={handleSearchClick}>
-                Поиск
-              </button>
+              <SearchBar onSearch={handleSearch} value={filter.search || searchParam} />
               <SortButton sortOrder={sortOrder} onClick={handleSortClick} />
               <div className="text-and-button">
                 <button className="btn btn-primary" onClick={() => navigateTo('/RIP_front/moderator/employees/new/')}>

@@ -76,7 +76,7 @@ const EmployeesPage: FC = () => {
     // const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Timeout'), 1000));
   
     try {
-      const response = await axios.get(`http://localhost:8000/employees/?filter=${searchName}`, {
+      const response = await axios.get(`/api/employees/?filter=${searchName}`, {
         withCredentials: true,
         signal: controller.signal,
       });
@@ -159,7 +159,7 @@ const renderCartButton = (employee: Employee) => {
 
 const handleAddToCart = async (employeeId: number) => {
   try {
-    const response = await axios.post(`http://localhost:8000/add-employee-to-request/${employeeId}/`, null, {
+    const response = await axios.post(`/api/add-employee-to-request/${employeeId}/`, null, {
       withCredentials: true,
     });
     fetchEmployees(filter.search || searchParam);
