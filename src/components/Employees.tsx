@@ -1,8 +1,12 @@
+// EmployeesPage.tsx
 import { FC, useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
-import './Employees.css';
-import logoImage from './logo.jpg';
+import SearchBar from './SearchBar';
+import SortButton from './SortButton';
+import Header from './Header';
+import '../styles/Employees.css';
+import logoImage from '../logo.jpg';
 
 interface Employee {
   id: number;
@@ -10,7 +14,7 @@ interface Employee {
   status: boolean;
   role: string;
   info: string;
-  photo_binary: string;
+  photo_binary: string|null;
 }
 
 const EmployeesPage: FC = () => {
@@ -20,27 +24,66 @@ const EmployeesPage: FC = () => {
   const nameParam = queryParams.get('name') || '';
 
   const [employees, setEmployees] = useState<Employee[]>([]);
-  const [nameValue, setNameValue] = useState(nameParam);
+  const [nameValue] = useState(nameParam);
   const [sortOrder, setSortOrder] = useState('asc');
 
-  const fetchEmployees = (searchName: string) => {
-    fetch(`http://localhost:8000/employees/?filter=${searchName}`)
-      .then(response => response.json())
-      .then(data => {
-        setEmployees(data);
-      })
-      .catch(error => {
-        console.error('Error fetching employees:', error);
-      });
-  };
-
+  const mockEmployees: Employee[] = [
+    {
+      id: 1,
+      name: 'Сотрудник 1',
+      status: true,
+      role: 'преподаватель',
+      info: 'Мок сотрудник ',
+      photo_binary: null,
+    },
+    {
+      id: 2,
+      name: 'Сотрудник 2',
+      status: true,
+      role: 'преподаватель',
+      info: 'Мок сотрудник ',
+      photo_binary: null,
+    },
+    {
+      id: 3,
+      name: 'Сотрудник 3',
+      status: true,
+      role: 'студент',
+      info: 'Мок сотрудник ',
+      photo_binary: null,
+    }
+  ]
+    const fetchEmployees = (searchName: string) => {
+      const controller = new AbortController();
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject('Timeout'), 1000));
+    
+      Promise.race([
+        fetch(`http://localhost:8000/employees/?filter=${searchName}`, { signal: controller.signal })
+          .then(response => response.json())
+          .then(data => setEmployees(data)),
+        timeoutPromise
+      ])
+        .catch(error => {
+          if (error === 'Timeout') {
+            console.log('Время ожидания ответа превысило 3 секунды.');
+            setEmployees(mockEmployees)
+            // Дополнительная логика, если запрос прерван по тайм-ауту
+          } else {
+            console.error('Error fetching employees:', error);
+            setEmployees(mockEmployees);
+          }
+        })
+        .finally(() => controller.abort());
+    };
+    
   const breadcrumbsItems = [
     { label: 'Все сотрудники', link: '' }
   ];
 
-  const handleSearchClick = () => {
-    navigateTo(`?filter=${nameValue}`);
-    fetchEmployees(nameValue);
+
+  const handleSearch = (query: string) => {
+    navigateTo(`?filter=${query}`);
+    fetchEmployees(query);
   };
 
   const handleSortClick = () => {
@@ -59,30 +102,17 @@ const EmployeesPage: FC = () => {
   });
 
   return (
+
     <div className="album">
       <div className="container">
         <div className="row">
+          < Header />
           <Breadcrumbs items={breadcrumbsItems} />
 
-          <div className="search-bar">
-            <input
-              type="text"
-              id="name-input"
-              placeholder="Поиск"
-              value={nameValue}
-              onChange={(event => setNameValue(event.target.value))}
-            />
-            <button type="button" id="search-button" onClick={handleSearchClick}>
-              Искать
-            </button>
-          </div>
+          <SearchBar onSearch={handleSearch} />
 
           {/* Добавлен блок для кнопки сортировки */}
-          <div className="sort-button-container text-center">
-            <button type="button" id="sort-button" onClick={handleSortClick}>
-              Сортировка: {sortOrder === 'asc' ? 'А-Я' : 'Я-А'}
-            </button>
-          </div>
+          <SortButton sortOrder={sortOrder} onClick={handleSortClick} />
 
           <ul className="employees-list">
             {sortedEmployees.map((employee) => (

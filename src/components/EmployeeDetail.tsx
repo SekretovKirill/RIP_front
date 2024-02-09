@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Breadcrumbs from './Breadcrumbs';
-import './EmployeeDetail.css'; // Изменил название стиля, предположим, что у вас есть стиль EmployeeDetail.css
-import logoImage from './logo.jpg';
+import '../styles/EmployeeDetail.css';
+import logoImage from '../logo.jpg';
+import Header from './Header';
+
 
 const EmployeeDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Accessing the employee_id from the URL
   const [employeeData, setEmployeeData] = useState({
-    name: '',
-    photo_binary: '',
-    role: '',
-    info: '',
+    name: 'Сотрудник 1',
+    photo_binary: null,
+    role: 'преподаватель',
+    info: 'Мок сотрудник',
   });
-
   const breadcrumbsItems = [
     { label: 'Все сотрудники', link: '/RIP_front/employees' },
     { label: 'Подробнее', link: '' },
@@ -28,6 +29,7 @@ const EmployeeDetailPage: React.FC = () => {
         console.error('Error fetching employee data:', error);
       }
     };
+    
 
     fetchEmployeeData(); // Call the fetchEmployeeData function when the component mounts
 
@@ -41,6 +43,7 @@ const EmployeeDetailPage: React.FC = () => {
     <div className="container">
       {
         <div className="row">
+          <Header/>
           <Breadcrumbs items={breadcrumbsItems} /> {/* Include Breadcrumbs component */}
           <div className="col">
             <div className="card">
