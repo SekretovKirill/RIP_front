@@ -4,6 +4,7 @@ import Breadcrumbs from './Breadcrumbs';
 import '../styles/EmployeeDetail.css';
 import logoImage from '../logo.jpg';
 import Header from './Header';
+import axios from 'axios';
 
 
 const EmployeeDetailPage: React.FC = () => {
@@ -19,23 +20,21 @@ const EmployeeDetailPage: React.FC = () => {
     { label: 'Подробнее', link: '' },
   ];
 
+
+  const fetchEmployeeData = async () => {
+    try {
+      const response = await axios.get(`/api/employees/photo/${id}/`);
+      const data = response.data;
+      setEmployeeData(data); // Update state with fetched data
+    } catch (error) {
+      console.error('Error fetching employee data:', error);
+    }
+  };
+
   useEffect(() => {
-    const fetchEmployeeData = async () => {
-      try {
-        const response = await fetch(`http://localhost:8000/employees/photo/${id}`); // Assuming your API endpoint is like 'employees/id'
-        const data = await response.json();
-        setEmployeeData(data); // Update state with fetched data
-      } catch (error) {
-        console.error('Error fetching employee data:', error);
-      }
-    };
-    
+    fetchEmployeeData();
 
-    fetchEmployeeData(); // Call the fetchEmployeeData function when the component mounts
-
-    // Cleanup the effect when the component is unmounted (optional)
     return () => {
-      // Cleanup code (if needed)
     };
   }, [id]); // Dependency array ensures the effect runs whenever 'id' changes
 

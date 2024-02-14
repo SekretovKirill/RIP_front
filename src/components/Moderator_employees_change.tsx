@@ -112,10 +112,7 @@ const ModeratorEmployeesChangePage: React.FC = () => {
       const updatedData = response.data;
       setEmployeeData(updatedData);
 
-      if (isCreate) {
-        // Redirect to the created employee page
-        navigateTo(`/RIP_front/moderator/employees/`);
-      }
+      navigateTo(`/RIP_front/moderator/employees/`);
     } catch (error) {
       console.error('Error updating/creating employee data:', error);
     }

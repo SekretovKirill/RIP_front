@@ -170,7 +170,7 @@ const handleAddToCart = async (employeeId: number) => {
 };
 
 const renderUserButton = (userStatus: string | null) => {
-  if (userStatus === 'User') {
+  if ((userStatus!== null) && (userStatus === 'User')) {
     return (
       <div style={{ marginLeft: 'auto', textAlign: 'right'}}>
         <button

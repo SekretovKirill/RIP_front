@@ -21,7 +21,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onLogout }) => {
       dispatch(resetFilter());
 
       // Navigate after logout
-      navigate('/RIP_front/employees');
+      navigate('/RIP_front/employees/');
       onLogout();
     } catch (error) {
       console.error('Error during logout:', error);

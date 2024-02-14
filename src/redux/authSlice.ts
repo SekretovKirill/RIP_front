@@ -26,13 +26,11 @@ const initialState: AuthState = {
 
 export const logoutUser = createAsyncThunk('auth/logout', async () => {
   try {
-    // Send a request to the server to log out
     await axios.get('/api/auth/logout', {
       withCredentials: true,
     });
   } catch (error) {
     console.error('Error during logout:', error);
-    // You might want to handle the error here
   }
 });
 
@@ -77,6 +75,10 @@ const authSlice = createSlice({
       state.name = null;
       state.role = null;
       Cookies.remove('session_key');
+      localStorage.removeItem('role');
+      localStorage.removeItem('id');
+      localStorage.removeItem('name');
+      localStorage.removeItem('isAuthenticated');
     });
   },
 });

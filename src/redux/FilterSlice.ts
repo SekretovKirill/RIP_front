@@ -71,7 +71,14 @@ const FilterSlice = createSlice({
     resetFilter: (state) => {
       // Reset all filter states to their initial values
       Object.assign(state, initialState);
-
+      state.search=null;
+      state.startDate = null;
+      state.endDate = null;
+      state.eventStatus = null;
+      state.reserveStatus = null;
+      state.user = null;
+      state.status = null;
+      state.sortOrder = 'asc';
       // Also clear the local storage
       localStorage.removeItem('user');
       localStorage.removeItem('status');

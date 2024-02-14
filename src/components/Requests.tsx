@@ -1,5 +1,5 @@
 import React, { FC, useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import '../styles/Employees.css'; // Update your CSS file if needed
 import Header from './Header';
@@ -34,12 +34,6 @@ const breadcrumbsItems = [
 const ModeratorRequestsPage: FC = () => {
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const userParam = queryParams.get('user') || '';
-  const statusParam = queryParams.get('status') || '';
-  const startDateParam = queryParams.get('start_date') || '';
-  const endDateParam = queryParams.get('end_date') || '';
 
   const [requests, setRequests] = useState<Request[]>([]);
   
@@ -47,6 +41,7 @@ const ModeratorRequestsPage: FC = () => {
   const filter = useSelector((state: RootState) => state.filter);
 
   const isUserLoggedIn = document.cookie.includes('session_key');
+  // const [pollingIntervalId, setPollingIntervalId] = useState<number | undefined>(undefined);
 
   const fetchRequests = async () => {
     try {
@@ -78,23 +73,63 @@ const ModeratorRequestsPage: FC = () => {
       console.error('Error fetching requests:', error);
     }
   };
+
+  // const fetchRequests = async () => {
+  //   try {
+  //     if (!pollingIntervalId) { // Проверяем, не запущен ли уже интервал
+  //       const intervalId = setInterval(fetchRequests, 5000); // Создаем интервал только если его еще нет
+  //       setPollingIntervalId(intervalId); // Сохраняем ID интервала в состоянии
+  //     }
+
+  //     const response = await axios.get<Request[]>(`/api/requests/`, {
+  //       params: {
+  //         status: filter.status,
+  //         start_date: filter.startDate,
+  //         end_date: filter.endDate,
+  //       },
+  //       withCredentials: true,
+  //     });
   
+  //     const data = response.data;
+  
+  //     // Если у пользователя роль админа и указан конкретный пользователь в фильтре, фильтруем по client
+  //     let filteredData = data;
+  
+  //     if (auth.role === 'Admin' && filter.user !== null && filter.user !== '') {
+  //       const userId = parseInt(filter.user, 10);
+  //       filteredData = data.filter((requestItem: Request) => requestItem.request.client === userId);
+  //     }
+  //     if (auth.role === 'User' && auth.id) {
+  //       const userAuthId = parseInt(auth.id, 10);
+  //       filteredData = data.filter((requestItem: Request) => requestItem.request.client === userAuthId);
+  //     }
+  
+  //     setRequests(filteredData);
+  //   } catch (error) {
+  //     console.error('Error fetching requests:', error);
+  //   } finally {
+  //     if (!pollingIntervalId) { // Проверяем, не был ли уже очищен интервал
+  //       clearInterval(pollingIntervalId); // Очищаем интервал
+  //       setPollingIntervalId(null); // Сбрасываем состояние ID интервала
+  //     }
+  //   }
+  // };
+
   useEffect(() => {
     if (!isUserLoggedIn) {
       navigateTo('/RIP_front/login');
     } else {
-      const userFromStorage = localStorage.getItem('user');
-      dispatch(setUser(userFromStorage || userParam));
-
-      // Установим статус из localStorage, если он там есть
-      const statusFromStorage = localStorage.getItem('status');
-      dispatch(setStatus(statusFromStorage || statusParam));
-
-      dispatch(setStartDate(localStorage.getItem('start_date') || startDateParam));
-      dispatch(setEndDate(localStorage.getItem('end_date') || endDateParam));
       fetchRequests();
     }
-  }, [auth.isAuthenticated, auth.role, userParam, statusParam, startDateParam, endDateParam, navigateTo]);
+  }, [isUserLoggedIn, navigateTo, filter]);
+
+  useEffect(() => {
+    const pollInterval = setInterval(fetchRequests, 5000); // Опрос каждые 5 секунд (вы можете изменить интервал по вашему усмотрению)
+
+    return () => {
+      clearInterval(pollInterval); // Очистка интервала при размонтировании компонента
+    };
+  }, [filter]);
 
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -111,22 +146,16 @@ const ModeratorRequestsPage: FC = () => {
     }
   };
 
-  const statusTranslations: Record<string, string> = {
+  const statusTranslations: Record<string, string | null> = {
     'in progress': 'В процессе',
     'completed': 'Завершено',
     'canceled': 'Отменено',
-    null: 'Неизвестно',
+    null: 'Все статусы',
   };
   
   const handleApprove = (requestId: number) => {
     const data = { status: 'completed' };
-  
-    const cookies = document.cookie;
-  
-    // const headers = {
-    //   'Content-Type': 'application/json',
-    //   'Cookie': `session_key=${cookies}`
-    // };
+
   
     axios.put(`/api/requests/${requestId}/put_admin/`, data, {withCredentials: true,})
       .then(response => {
@@ -150,15 +179,29 @@ const ModeratorRequestsPage: FC = () => {
       });
   };
   
+  const handleSearch = () => {
+    fetchRequests();
+  };
+
+  // const handleSearch = () => {
+  //   setCurrentFilters({
+  //     status: filter.status,
+  //     startDate: filter.startDate,
+  //     endDate: filter.endDate,
+  //   });
+  //   fetchRequests();
+  // };
   
-  const handleStartDateChange = (date: Date | null) => {
+  const handleStartDateChange = (date: Date) => {
     const formattedDate = date ? format(date, 'yyyy-MM-dd') : null;
-    dispatch(setStartDate(formattedDate));
+    dispatch(setStartDate(formattedDate));  
+    // localStorage.setItem('start_date', formattedDate);
   };
   
-  const handleEndDateChange = (date: Date | null) => {
+  const handleEndDateChange = (date: Date) => {
     const formattedDate = date ? format(date, 'yyyy-MM-dd') : null;
     dispatch(setEndDate(formattedDate));
+    // localStorage.setItem('end_date', formattedDate);
   };
 
 
@@ -171,7 +214,7 @@ const ModeratorRequestsPage: FC = () => {
             <Breadcrumbs items={breadcrumbsItems} />
             {auth.role === 'Admin' && (
               <div>
-                <label htmlFor="userId" >User ID:</label>
+                <label htmlFor="userId" >ID пользователя:</label>
                 <input
                   type="text"
                   id="userId"
@@ -206,7 +249,7 @@ const ModeratorRequestsPage: FC = () => {
               onChange={handleEndDateChange}
               placeholderText="Дата до"
             />
-            <button onClick={fetchRequests}>Search</button>
+            <button onClick={handleSearch}>Поиск</button>
             <table className="table"> 
             <thead>
                 <tr>
@@ -216,8 +259,10 @@ const ModeratorRequestsPage: FC = () => {
                   <th scope="col">Дата создания</th>
                   <th scope="col">Дата формирования</th>
                   <th scope="col">Дата завершения</th>
+
                   {auth.role === 'Admin' && (
                     <>
+                      <th scope="col">Колво проверок</th>
                       <th scope="col">Модератор</th>
                       <th scope="col">Пользователь</th>
                     </>
@@ -240,6 +285,7 @@ const ModeratorRequestsPage: FC = () => {
                     <td style={{ border: '1px solid #000', padding: '8px' }}>{req.request.completion_date ? format(new Date(req.request.completion_date), 'dd.MM.yyyy') : 'N/A'}</td>
                     {auth.role === 'Admin' && (
                     <>
+                    <td style={{ border: '1px solid #000', padding: '8px' }}>{req.request.security_count}</td>
                     <td style={{ border: '1px solid #000', padding: '8px' }}>{req.request.moderator}</td>
                     <td style={{ border: '1px solid #000', padding: '8px' }}>{req.request.client}</td>
                     </>

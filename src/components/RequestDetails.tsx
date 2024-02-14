@@ -51,6 +51,7 @@ const formatDate = (dateString: string | null): string => {
 const RequestDetailsPage: React.FC = () => {
   const [requestDetails, setRequestDetails] = useState<RequestDetails | null>(null);
   const { id } = useParams<{ id: string }>();
+  // const { req_id } = useParams<{ id: string }>();
 
   const fetchRequestDetails = async () => {
     try {
@@ -95,6 +96,12 @@ const RequestDetailsPage: React.FC = () => {
       await axios.put(`/api/requests/${id}/put_user/`, null, {
         withCredentials: true,
       });
+      for (const employee of requestDetails.related_employees) {
+        await axios.post(`/api/send_security/${employee.id}/${id}/`, null, {
+          withCredentials: true,
+        });
+      }
+
       fetchRequestDetails();
     } catch (error) {
       console.error('Error sending request:', error);
